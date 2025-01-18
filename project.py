@@ -70,47 +70,47 @@ class Apartment:
         for t in range(n_timeslips):
             if t == 0:
                 for room in self.rooms:
-                    for i in range(room.x_coords[0], room.y_coords[0]):
-                        for j in range(room.x_coords[1]. room.y_coords[1]):
+                    for i in range(room.x_coords[0], room.x_coords[1]):
+                        for j in range(room.y_coords[0]. room.y_coords[1]):
                             self.Matrix[0][i][j] = self.base_temp
 
                 for window in self.windows:
-                    for i in range(window.x_coords[0], window.y_coords[0]):
-                        for j in range(window.x_coords[1], window.y_coords[1]):
+                    for i in range(window.x_coords[0], window.x_coords[1]):
+                        for j in range(window.y_coords[0], window.y_coords[1]):
                             self.Matrix[0][i][j] = temp_outside[0]
 
             else:
                 for room in self.rooms:
-                    for i in range(room.x_coords[0], room.y_coords[0]):
-                        for j in range(room.x_coords[1]. room.y_coords[1]):
+                    for i in range(room.x_coords[0], room.x_coords[1]):
+                        for j in range(room.y_coords[0]. room.y_coords[1]):
                             self.Matrix[t][i][j] = self.Matrix[t-1][i][j] + (self.coeff * ht / hx**2) * \
                             ( self.Matrix[t-1][i+1][j] + self.Matrix[t-1][i-1][j] + self.Matrix[t-1][i][j-1] + self.Matrix[t-1][i][j+1] - 4 * self.Matrix[t-1][i][j] )
 
+                    for i in range(room.x_coords[0]-1, room.x_coords[1]+1):
+                        self.Matrix[t][i][room.y_coords[0]-1] = \
+                                self.Matrix[t][i][room.y_coords[0]]
+                        self.Matrix[t][i][room.y_coords[1]+1] = \
+                                self.Matrix[t][i][room.y_coords[1]]               
+
+                    for j in range(room.y_coords[0]-1, room.y_coords[1]+1):
+                        self.Matrix[t][room.x_coords[0]-1][j] = \
+                                self.Matrix[t][room.x_coords[0]][j]
+                        self.Matrix[t][room.x_coords[1]+1][j] = \
+                                self.Matrix[t][room.x_coords[1]][j]
+
                 for radiator in self.radiators:
-                    for i in range(radiator.x_coords[0], radiator.y_coords[0]):
-                        for j in range(radiator.x_coords[1]. radiator.y_coords[1]):
-                            self.Matrix[t][i][j] += radiator.power(i, j)
+                    for i in range(radiator.x_coords[0], radiator.x_coords[1]):
+                        for j in range(radiator.y_coords[0]. radiator.y_coords[1]):
+                            self.Matrix[t][i][j] += radiator.power(t, i, j)
  
                 for window in self.windows:
-                    for i in range(window.x_coords[0], window.y_coords[0]):
-                        for j in range(window.x_coords[1]. window.y_coords[1]):
+                    for i in range(window.x_coords[0], window.x_coords[1]):
+                        for j in range(window.y_coords[0]. window.y_coords[1]):
                             self.Matrix[t][i][j] = self.temp_outside(t) 
   
                 for door in self.doors:
-                    for i in range(door.x_coords[0], door.y_coords[0]):
-                        for j in range(door.x_coords[1]. door.y_coords[1]):
+                    for i in range(door.x_coords[0], door.x_coords[1]):
+                        for j in range(door.y_coords[0]. door.y_coords[1]):
                             self.Matrix[t][i][j] = self.base_temp 
  
-
-
-
-
-
-
-
-
-
-
-
-
 
