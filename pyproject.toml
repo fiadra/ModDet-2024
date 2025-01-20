@@ -1,0 +1,18 @@
+[project]
+name = "projekt"
+version = "0.1.0"
+description = "Mój projekt na przedmiot Modelowanie Deterministyczne w semestrze zimowym roku akademickiego 2024/2025"
+authors = [
+    {name = "Filip Rabiega"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy (>=2.2.2,<3.0.0)",
+    "matplotlib (>=3.10.0,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
