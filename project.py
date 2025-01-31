@@ -147,22 +147,29 @@ class Apartment:
                             self.Matrix[t][i][j] = self.temp_outside(t * self.ht)
 
                 for door in self.doors:
+                    s = 0
                     if door.direction == "horizontal":
                         for i in range(door.x_coords[0], door.x_coords[1]):
                             avg_temp = (
                                 self.Matrix[t][i][door.y_coords[0] - 1]
                                 + self.Matrix[t][i][door.y_coords[1] + 1]
                             ) / 2
+                            s += avg_temp
+                        s = s / ( door.x_coords[1] - door.x_coords[0] )
+                        for i in range(door.x_coords[0], door.x_coords[1]):
                             for j in range(door.y_coords[0], door.y_coords[1]):
-                                self.Matrix[t][i][j] = avg_temp
+                                self.Matrix[t][i][j] = s
                     if door.direction == "vertical":
                         for j in range(door.y_coords[0], door.y_coords[1]):
                             avg_temp = (
                                 self.Matrix[t][door.x_coords[0] - 1][j]
                                 + self.Matrix[t][door.x_coords[1] + 1][j]
                             ) / 2
-                            for i in range(door.x_coords[0], door.x_coords[1]):
-                                self.Matrix[t][i][j] = avg_temp
+                            s += avg_temp
+                        s = s / ( door.y_coords[1] - door.y_coords[0] )
+                        for i in range(door.x_coords[0], door.x_coords[1]):
+                            for j in range(door.y_coords[0], door.y_coords[1]):
+                                self.Matrix[t][i][j] = s
 
 
 apartment = Apartment(
