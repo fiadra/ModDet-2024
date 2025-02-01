@@ -1,3 +1,4 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import math as m
 import numpy as np
@@ -8,8 +9,20 @@ def celcius_to_kelvin(t):
 
 
 def kelvin_to_celcius(t):
+    if t == 0: 
+        return 0
     return t - 273.15
 
+def turned_off_from_8AM_to_4PM(i, j, t):
+    if t < 8:
+        return 1500
+    if 8 <= t and t < 16:
+        return 0
+    if 16 <= t:
+        return 3000
+
+def kelvin_to_celcius_matrix(A):
+    return np.array([np.vectorize(kelvin_to_celcius)(xi) for xi in A])
 
 class Room:
     def __init__(self, x_coords, y_coords):
@@ -47,10 +60,6 @@ class Apartment:
         hx,
         T,
         ht,
-        n_rooms,
-        n_radiators,
-        n_windows,
-        n_doors,
     ):
         self.base_temp = base_temp
         self.coeff = coeff
@@ -60,10 +69,6 @@ class Apartment:
         self.T = T
         self.ht = ht
         self.n_timeslips = int(T / ht)
-        self.n_rooms = n_rooms
-        self.n_radiators = n_radiators
-        self.n_windows = n_windows
-        self.n_doors = n_doors
         self.rooms = []
         self.radiators = []
         self.windows = []
@@ -75,23 +80,25 @@ class Apartment:
 
     def add_room(self, room):
         self.rooms.append(room)
-        if len(self.rooms) > self.n_rooms:
-            print("źle")
 
     def add_radiator(self, radiator):
         self.radiators.append(radiator)
-        if len(self.radiators) > self.n_radiators:
-            print("źle")
 
     def add_window(self, window):
         self.windows.append(window)
-        if len(self.windows) > self.n_windows:
-            print("źle")
 
     def add_door(self, door):
         self.doors.append(door)
-        if len(self.doors) > self.n_doors:
-            print("źle")
+
+    def avg_temperature(self, t):
+        s, k = 0
+        t_0 = int(np.floor(t / self.ht))
+        for room in self.Rooms:
+            for i in range(room.x_coords[0], room.x_coords[1]):
+                for j in range(room.y_coords[0], room.y_coords[1]):
+                    s += self.Matrix[t_0][i][j]
+                    k += 1
+        return s / k
 
     def simulate(self):
         for t in range(self.n_timeslips):
@@ -139,7 +146,7 @@ class Apartment:
                 for radiator in self.radiators:
                     for i in range(radiator.x_coords[0], radiator.x_coords[1]):
                         for j in range(radiator.y_coords[0], radiator.y_coords[1]):
-                            self.Matrix[t][i][j] += self.ht * radiator.power(i, j, t)
+                            self.Matrix[t][i][j] += self.ht * radiator.power(i, j, t * self.ht)
 
                 for window in self.windows:
                     for i in range(window.x_coords[0], window.x_coords[1]):
@@ -172,76 +179,191 @@ class Apartment:
                                 self.Matrix[t][i][j] = s
 
 
-apartment = Apartment(
+apartment1 = Apartment(
     celcius_to_kelvin(20),
+    0.25,
+    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12)),
+    (100, 50),
     0.1,
-    lambda t: celcius_to_kelvin(np.sin(t) + 10),
-    (200, 100),
-    0.1,
-    1,
+    24,
     0.01,
-    int(6),
-    int(4),
-    int(3),
-    int(5),
 )
 
 ### Pokoje ###
 
-apartment.add_room(Room((2, 120), (2, 59)))  # duży pokój
-apartment.add_room(Room((2, 51), (63, 98)))  # kuchnia
-apartment.add_room(Room((55, 100), (63, 98)))  # łazienka
-apartment.add_room(Room((104, 120), (63, 98)))  # łącznik
-apartment.add_room(Room((124, 198), (42, 98)))  # sypialnia
-apartment.add_room(Room((124, 198), (2, 38)))  # przedpokój
+apartment1.add_room(Room((2, 65), (2, 29)))  # duży pokój
+apartment1.add_room(Room((2, 26), (33, 48)))  # kuchnia
+apartment1.add_room(Room((30, 45), (33, 48)))  # łazienka
+apartment1.add_room(Room((50, 65), (33, 48)))  # łącznik
+apartment1.add_room(Room((69, 98), (22, 48)))  # sypialnia
+apartment1.add_room(Room((69, 98), (2, 18)))  # przedpokój
 
 ### Grzejniki ###
 
-apartment.add_radiator(Radiator((2, 5), (10, 30), lambda i, j, t: 1000))  # duży pokój
-apartment.add_radiator(Radiator((70, 75), (68, 70), lambda i, j, t: 1000))  # łazienka
-apartment.add_radiator(
-    Radiator((195, 198), (60, 80), lambda i, j, t: 1000)
+apartment1.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
+apartment1.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment1.add_radiator(
+    Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
 )  # sypialnia
-apartment.add_radiator(
-    Radiator((180, 190), (35, 38), lambda i, j, t: 1000)
+apartment1.add_radiator(
+    Radiator((90, 95), (16, 20), turned_off_from_8AM_to_4PM)
 )  # przedpokój
 
 ### Okna ###
 
-apartment.add_window(Window((0, 1), (10, 40)))
-apartment.add_window(Window((0, 1), (70, 85)))
-apartment.add_window(Window((199, 200), (60, 90)))
+apartment1.add_window(Window((0, 1), (5, 20)))
+apartment1.add_window(Window((0, 1), (35, 42)))
+apartment1.add_window(Window((100, 101), (30, 45)))
 
 ### Drzwi ###
 
-apartment.add_door(Door((20, 40), (59, 63), "horizontal"))  # duży pokój i kuchnia
-apartment.add_door(Door((98, 118), (59, 63), "horizontal"))  # duży pokój i łącznik
-apartment.add_door(Door((100, 104), (70, 90), "vertical"))  # łącznik i łazienka
-apartment.add_door(Door((120, 124), (59, 63), "vertical"))  # łącznik i sypialnia
-apartment.add_door(Door((120, 124), (10, 30), "vertical"))  # duży pokój i przedpokój
+apartment1.add_door(Door((10, 20), (29, 32), "horizontal"))  # duży pokój i kuchnia
+apartment1.add_door(Door((53, 63), (29, 32), "horizontal"))  # duży pokój i łącznik
+apartment1.add_door(Door((46, 50), (35, 45), "vertical"))  # łącznik i łazienka
+apartment1.add_door(Door((65, 69), (35, 45), "vertical"))  # łącznik i sypialnia
+apartment1.add_door(Door((65, 69), (5, 15), "vertical"))  # duży pokój i przedpokój
 
-apartment.simulate()
+apartment1.simulate()
 
-X = np.linspace(0, 200, 201)
-Y = np.linspace(0, 100, 101)
+apartment2 = Apartment(
+    celcius_to_kelvin(20),
+    0.25,
+    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) - 20 ),
+    (100, 50),
+    0.1,
+    24,
+    0.01,
+)
+
+### Pokoje ###
+
+apartment2.add_room(Room((2, 65), (2, 29)))  # duży pokój
+apartment2.add_room(Room((2, 26), (33, 48)))  # kuchnia
+apartment2.add_room(Room((30, 45), (33, 48)))  # łazienka
+apartment2.add_room(Room((50, 65), (33, 48)))  # łącznik
+apartment2.add_room(Room((69, 98), (22, 48)))  # sypialnia
+apartment2.add_room(Room((69, 98), (2, 18)))  # przedpokój
+
+### Grzejniki ###
+
+apartment2.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
+apartment2.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment2.add_radiator(
+    Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
+)  # sypialnia
+apartment2.add_radiator(
+    Radiator((90, 95), (16, 20), turned_off_from_8AM_to_4PM)
+)  # przedpokój
+
+### Okna ###
+
+apartment2.add_window(Window((0, 1), (5, 20)))
+apartment2.add_window(Window((0, 1), (35, 42)))
+apartment2.add_window(Window((100, 101), (30, 45)))
+
+### Drzwi ###
+
+apartment2.add_door(Door((10, 20), (29, 32), "horizontal"))  # duży pokój i kuchnia
+apartment2.add_door(Door((53, 63), (29, 32), "horizontal"))  # duży pokój i łącznik
+apartment2.add_door(Door((46, 50), (35, 45), "vertical"))  # łącznik i łazienka
+apartment2.add_door(Door((65, 69), (35, 45), "vertical"))  # łącznik i sypialnia
+apartment2.add_door(Door((65, 69), (5, 15), "vertical"))  # duży pokój i przedpokój
+
+apartment2.simulate()
+
+apartment3 = Apartment(
+    celcius_to_kelvin(20),
+    0.25,
+    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) + 50 ),
+    (100, 50),
+    0.1,
+    24,
+    0.01,
+)
+
+### Pokoje ###
+
+apartment3.add_room(Room((2, 65), (2, 29)))  # duży pokój
+apartment3.add_room(Room((2, 26), (33, 48)))  # kuchnia
+apartment3.add_room(Room((30, 45), (33, 48)))  # łazienka
+apartment3.add_room(Room((50, 65), (33, 48)))  # łącznik
+apartment3.add_room(Room((69, 98), (22, 48)))  # sypialnia
+apartment3.add_room(Room((69, 98), (2, 18)))  # przedpokój
+
+### Grzejniki ###
+
+apartment3.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
+apartment3.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment3.add_radiator(
+    Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
+)  # sypialnia
+apartment3.add_radiator(
+    Radiator((90, 95), (16, 20), turned_off_from_8AM_to_4PM)
+)  # przedpokój
+
+### Okna ###
+
+apartment3.add_window(Window((0, 1), (5, 20)))
+apartment3.add_window(Window((0, 1), (35, 42)))
+apartment3.add_window(Window((100, 101), (30, 45)))
+
+### Drzwi ###
+
+apartment3.add_door(Door((10, 20), (29, 32), "horizontal"))  # duży pokój i kuchnia
+apartment3.add_door(Door((53, 63), (29, 32), "horizontal"))  # duży pokój i łącznik
+apartment3.add_door(Door((46, 50), (35, 45), "vertical"))  # łącznik i łazienka
+apartment3.add_door(Door((65, 69), (35, 45), "vertical"))  # łącznik i sypialnia
+apartment3.add_door(Door((65, 69), (5, 15), "vertical"))  # duży pokój i przedpokój
+
+apartment3.simulate()
+
+norm = mpl.colors.Normalize(vmin=-1., vmax=1., clip=False)
+X = np.linspace(0, 100, 101)
+Y = np.linspace(0, 50, 51)
 Z, W = np.meshgrid(Y, X)
+#fig, axs = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
+#axs[0, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1])))
+#axs[0, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1199])))
+#axs[0, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[2399])))
+#axs[1, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1])))
+#axs[1, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1199])))
+#axs[1, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[2399])))
+#axs[2, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1])))
+#axs[2, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1199])))
+#axs[2, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[2399])))
+#axs[0, 0].set_title("t = 0")
+#axs[0, 1].set_title("t = 12")
+#axs[0, 2].set_title("t = 24")
+#axs[0, 0].set_ylabel("$T^{1}_{out}$")
+#axs[1, 0].set_ylabel("$T^{2}_{out}$")
+#axs[2, 0].set_ylabel("$T^{3}_{out}$")
+
 fig, axs = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
-axs[0, 0].pcolormesh(W, Z, apartment.Matrix[0])
-axs[0, 1].pcolormesh(W, Z, apartment.Matrix[49])
-axs[0, 2].pcolormesh(W, Z, apartment.Matrix[99])
+axs[0, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[799])))
+axs[0, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1599])))
+axs[0, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[2399])))
+axs[1, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[799])))
+axs[1, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1599])))
+axs[1, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[2399])))
+axs[2, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[799])))
+axs[2, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1599])))
+axs[2, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[2399])))
+axs[0, 0].set_title("t = 8")
+axs[0, 1].set_title("t = 16")
+axs[0, 2].set_title("t = 24")
+axs[0, 0].set_ylabel("$T^{1}_{out}$")
+axs[1, 0].set_ylabel("$T^{2}_{out}$")
+axs[2, 0].set_ylabel("$T^{3}_{out}$")
+
 
 one_room_apartment_rad_next_to_window = Apartment(
     celcius_to_kelvin(20),
-    0.1,
+    0.25,
     lambda t: celcius_to_kelvin(5 * np.sin(t) - 100),
     (50, 50),
     0.1,
-    10,
+    24,
     0.01,
-    int(6),
-    int(4),
-    int(3),
-    int(5),
 )
 
 one_room_apartment_rad_next_to_window.add_room(Room((2, 48), (2, 48)))
@@ -254,16 +376,12 @@ one_room_apartment_rad_next_to_window.simulate()
 
 one_room_apartment_rad_next_to_wall = Apartment(
     celcius_to_kelvin(20),
-    0.1,
+    0.25,
     lambda t: celcius_to_kelvin(5 * np.sin(t) - 100),
     (50, 50),
     0.1,
-    10,
+    24,
     0.01,
-    int(6),
-    int(4),
-    int(3),
-    int(5),
 )
 one_room_apartment_rad_next_to_wall.add_room(Room((2, 48), (2, 48)))
 one_room_apartment_rad_next_to_wall.add_radiator(
@@ -276,24 +394,29 @@ one_room_apartment_rad_next_to_wall.simulate()
 X = np.linspace(0, 50, 51)
 Y = np.linspace(0, 50, 51)
 Z, W = np.meshgrid(Y, X)
-fig_one_room, axs_one_room = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
+fig_one_room, axs_one_room = plt.subplots(2, 3, figsize=(10, 10), sharey=True)
 axs_one_room[0, 0].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_window.Matrix[0])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_window.Matrix[1])
 )
 axs_one_room[0, 1].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_window.Matrix[499])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_window.Matrix[1199])
 )
 axs_one_room[0, 2].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_window.Matrix[999])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_window.Matrix[2399])
 )
 axs_one_room[1, 0].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_wall.Matrix[0])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_wall.Matrix[1])
 )
 axs_one_room[1, 1].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_wall.Matrix[499])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_wall.Matrix[1199])
 )
 axs_one_room[1, 2].pcolormesh(
-    W, Z, kelvin_to_celcius(one_room_apartment_rad_next_to_wall.Matrix[999])
+    W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_wall.Matrix[2399])
 )
+axs_one_room[0,0].set_title("t = 0")
+axs_one_room[0,1].set_title("t = 12")
+axs_one_room[0,2].set_title("t = 24")
+axs_one_room[0,0].set_ylabel("Grzejnik przy oknie")
+axs_one_room[0,0].set_ylabel("Grzejnik przy ścianie")
 
 plt.show()
