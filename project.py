@@ -9,9 +9,10 @@ def celcius_to_kelvin(t):
 
 
 def kelvin_to_celcius(t):
-    if t == 0: 
+    if t == 0:
         return 0
     return t - 273.15
+
 
 def turned_off_from_8AM_to_4PM(i, j, t):
     if t < 8:
@@ -21,8 +22,10 @@ def turned_off_from_8AM_to_4PM(i, j, t):
     if 16 <= t:
         return 3000
 
+
 def kelvin_to_celcius_matrix(A):
     return np.array([np.vectorize(kelvin_to_celcius)(xi) for xi in A])
+
 
 class Room:
     def __init__(self, x_coords, y_coords):
@@ -146,7 +149,9 @@ class Apartment:
                 for radiator in self.radiators:
                     for i in range(radiator.x_coords[0], radiator.x_coords[1]):
                         for j in range(radiator.y_coords[0], radiator.y_coords[1]):
-                            self.Matrix[t][i][j] += self.ht * radiator.power(i, j, t * self.ht)
+                            self.Matrix[t][i][j] += self.ht * radiator.power(
+                                i, j, t * self.ht
+                            )
 
                 for window in self.windows:
                     for i in range(window.x_coords[0], window.x_coords[1]):
@@ -162,7 +167,7 @@ class Apartment:
                                 + self.Matrix[t][i][door.y_coords[1] + 1]
                             ) / 2
                             s += avg_temp
-                        s = s / ( door.x_coords[1] - door.x_coords[0] )
+                        s = s / (door.x_coords[1] - door.x_coords[0])
                         for i in range(door.x_coords[0], door.x_coords[1]):
                             for j in range(door.y_coords[0], door.y_coords[1]):
                                 self.Matrix[t][i][j] = s
@@ -173,7 +178,7 @@ class Apartment:
                                 + self.Matrix[t][door.x_coords[1] + 1][j]
                             ) / 2
                             s += avg_temp
-                        s = s / ( door.y_coords[1] - door.y_coords[0] )
+                        s = s / (door.y_coords[1] - door.y_coords[0])
                         for i in range(door.x_coords[0], door.x_coords[1]):
                             for j in range(door.y_coords[0], door.y_coords[1]):
                                 self.Matrix[t][i][j] = s
@@ -200,8 +205,12 @@ apartment1.add_room(Room((69, 98), (2, 18)))  # przedpokój
 
 ### Grzejniki ###
 
-apartment1.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
-apartment1.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment1.add_radiator(
+    Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM)
+)  # duży pokój
+apartment1.add_radiator(
+    Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM)
+)  # łazienka
 apartment1.add_radiator(
     Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
 )  # sypialnia
@@ -228,7 +237,7 @@ apartment1.simulate()
 apartment2 = Apartment(
     celcius_to_kelvin(20),
     0.25,
-    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) - 20 ),
+    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) - 20),
     (100, 50),
     0.1,
     24,
@@ -246,8 +255,12 @@ apartment2.add_room(Room((69, 98), (2, 18)))  # przedpokój
 
 ### Grzejniki ###
 
-apartment2.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
-apartment2.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment2.add_radiator(
+    Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM)
+)  # duży pokój
+apartment2.add_radiator(
+    Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM)
+)  # łazienka
 apartment2.add_radiator(
     Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
 )  # sypialnia
@@ -274,7 +287,7 @@ apartment2.simulate()
 apartment3 = Apartment(
     celcius_to_kelvin(20),
     0.25,
-    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) + 50 ),
+    lambda t: celcius_to_kelvin(np.sin(np.pi * t / 12) + 50),
     (100, 50),
     0.1,
     24,
@@ -292,8 +305,12 @@ apartment3.add_room(Room((69, 98), (2, 18)))  # przedpokój
 
 ### Grzejniki ###
 
-apartment3.add_radiator(Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM))  # duży pokój
-apartment3.add_radiator(Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM))  # łazienka
+apartment3.add_radiator(
+    Radiator((2, 5), (5, 15), turned_off_from_8AM_to_4PM)
+)  # duży pokój
+apartment3.add_radiator(
+    Radiator((35, 40), (35, 38), turned_off_from_8AM_to_4PM)
+)  # łazienka
 apartment3.add_radiator(
     Radiator((95, 98), (30, 40), turned_off_from_8AM_to_4PM)
 )  # sypialnia
@@ -317,26 +334,26 @@ apartment3.add_door(Door((65, 69), (5, 15), "vertical"))  # duży pokój i przed
 
 apartment3.simulate()
 
-norm = mpl.colors.Normalize(vmin=-1., vmax=1., clip=False)
+norm = mpl.colors.Normalize(vmin=-1.0, vmax=1.0, clip=False)
 X = np.linspace(0, 100, 101)
 Y = np.linspace(0, 50, 51)
 Z, W = np.meshgrid(Y, X)
-#fig, axs = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
-#axs[0, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1])))
-#axs[0, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1199])))
-#axs[0, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[2399])))
-#axs[1, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1])))
-#axs[1, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1199])))
-#axs[1, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[2399])))
-#axs[2, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1])))
-#axs[2, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1199])))
-#axs[2, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[2399])))
-#axs[0, 0].set_title("t = 0")
-#axs[0, 1].set_title("t = 12")
-#axs[0, 2].set_title("t = 24")
-#axs[0, 0].set_ylabel("$T^{1}_{out}$")
-#axs[1, 0].set_ylabel("$T^{2}_{out}$")
-#axs[2, 0].set_ylabel("$T^{3}_{out}$")
+# fig, axs = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
+# axs[0, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1])))
+# axs[0, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[1199])))
+# axs[0, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[2399])))
+# axs[1, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1])))
+# axs[1, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[1199])))
+# axs[1, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment2.Matrix[2399])))
+# axs[2, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1])))
+# axs[2, 1].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[1199])))
+# axs[2, 2].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment3.Matrix[2399])))
+# axs[0, 0].set_title("t = 0")
+# axs[0, 1].set_title("t = 12")
+# axs[0, 2].set_title("t = 24")
+# axs[0, 0].set_ylabel("$T^{1}_{out}$")
+# axs[1, 0].set_ylabel("$T^{2}_{out}$")
+# axs[2, 0].set_ylabel("$T^{3}_{out}$")
 
 fig, axs = plt.subplots(3, 3, figsize=(10, 10), sharey=True)
 axs[0, 0].pcolormesh(W, Z, norm(kelvin_to_celcius_matrix(apartment1.Matrix[799])))
@@ -413,10 +430,10 @@ axs_one_room[1, 1].pcolormesh(
 axs_one_room[1, 2].pcolormesh(
     W, Z, kelvin_to_celcius_matrix(one_room_apartment_rad_next_to_wall.Matrix[2399])
 )
-axs_one_room[0,0].set_title("t = 0")
-axs_one_room[0,1].set_title("t = 12")
-axs_one_room[0,2].set_title("t = 24")
-axs_one_room[0,0].set_ylabel("Grzejnik przy oknie")
-axs_one_room[0,0].set_ylabel("Grzejnik przy ścianie")
+axs_one_room[0, 0].set_title("t = 0")
+axs_one_room[0, 1].set_title("t = 12")
+axs_one_room[0, 2].set_title("t = 24")
+axs_one_room[0, 0].set_ylabel("Grzejnik przy oknie")
+axs_one_room[0, 0].set_ylabel("Grzejnik przy ścianie")
 
 plt.show()
